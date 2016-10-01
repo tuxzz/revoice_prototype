@@ -7,10 +7,10 @@ from revoice.common import *
 w, sr = loadWav("voices/yuri_orig.wav")
 
 pyinProc = pyin.Processor(sr)
-obsProb = pyinProc(w)
+obsProbList = pyinProc(w)
 
 monopitchProc = monopitch.Processor(*monopitch.parameterFromPYin(pyinProc))
-f0 = monopitchProc(w, obsProb)
+f0 = monopitchProc(w, obsProbList)
 
 pl.plot(f0)
 pl.show()

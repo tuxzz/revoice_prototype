@@ -149,7 +149,7 @@ class Processor:
 
         return out
 
-    def __call__(self, x, obsProb):
+    def __call__(self, x, obsProbList):
         # constant
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
@@ -157,7 +157,7 @@ class Processor:
         nState = len(self.viterbiDecoder.init)
 
         # check input
-        assert(nHop == len(obsProb))
+        assert(nHop == len(obsProbList))
 
         # decode
         obsSeq = np.zeros((nHop, nState), dtype = np.float64)
@@ -165,7 +165,7 @@ class Processor:
             frame = getFrame(x, iHop * self.hopSize, self.windowSize)
             frame = simpleDCRemove(frame)
             meanEnergy = np.mean(frame ** 2)
-            obsSeq[iHop] = self.calcStateProb(obsProb[iHop], meanEnergy)
+            obsSeq[iHop] = self.calcStateProb(obsProbList[iHop], meanEnergy)
         path = self.viterbiDecoder(obsSeq)
         del obsSeq
 

@@ -9,13 +9,13 @@ import matplotlib.patches as patches
 w, sr = loadWav("voices/tuku_ra.wav")
 
 pyinProc = pyin.Processor(sr)
-obsProb = pyinProc(w)
+obsProbList = pyinProc(w)
 
 monopitchProc = monopitch.Processor(*monopitch.parameterFromPYin(pyinProc))
-f0 = monopitchProc(w, obsProb)
+f0 = monopitchProc(w, obsProbList)
 
 mononoteProc = mononote.Processor(*mononote.parameterFromPYin(pyinProc))
-noteList = mononoteProc(w, obsProb)
+noteList = mononoteProc(w, obsProbList)
 
 fig = pl.figure()
 ax = pl.subplot(111)

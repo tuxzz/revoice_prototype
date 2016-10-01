@@ -96,7 +96,7 @@ class Processor:
         out = np.clip(out, 0.0, np.inf) + 1e-05
         return out
 
-    def __call__(self, x, obsProb):
+    def __call__(self, x, obsProbList):
         # constant
         nBin = int(self.nSemitone * self.binPerSemitone)
         nState = len(self.viterbiDecoder.init)
@@ -105,19 +105,19 @@ class Processor:
         nHop = getNFrame(nX, self.hopSize)
 
         # check input
-        assert(nHop == len(obsProb))
-        if(isinstance(obsProb, list)):
+        assert(nHop == len(obsProbList))
+        if(isinstance(obsProbList, list)):
             pass
-        elif(isinstance(obsProb, np.ndarray)):
-            assert(obsProb.ndim == 2)
-            assert(obsProb.shape[1] == 2)
+        elif(isinstance(obsProbList, np.ndarray)):
+            assert(obsProbList.ndim == 2)
+            assert(obsProbList.shape[1] == 2)
         else:
             raise TypeError("Unsupported obsSeq type")
 
         # decode
         obsSeq = np.zeros((nHop, nState), dtype = np.float64)
         for iHop in range(nHop):
-            obsSeq[iHop] = self.calcStateProb(obsProb[iHop])
+            obsSeq[iHop] = self.calcStateProb(obsProbList[iHop])
         path = self.viterbiDecoder(obsSeq)
         del obsSeq
 
@@ -126,8 +126,8 @@ class Processor:
         for iHop in range(nHop):
             if(path[iHop] < nBin):
                 hmmFreq = self.minFreq * np.power(2, path[iHop] / (12.0 * self.binPerSemitone))
-                iNearest = np.argmin(np.abs(obsProb[iHop].T[0] - hmmFreq))
-                bestFreq = obsProb[iHop][iNearest][0]
+                iNearest = np.argmin(np.abs(obsProbList[iHop].T[0] - hmmFreq))
+                bestFreq = obsProbList[iHop][iNearest][0]
                 if(bestFreq < self.minFreq or bestFreq > maxFreq or abs(np.log2(bestFreq / self.minFreq) * 12 * self.binPerSemitone - path[iHop]) > 1.0):
                     bestFreq = hmmFreq
             else:
