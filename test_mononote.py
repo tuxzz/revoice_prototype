@@ -12,14 +12,14 @@ pyinProc = pyin.Processor(sr)
 obsProbList = pyinProc(w)
 
 monopitchProc = monopitch.Processor(*monopitch.parameterFromPYin(pyinProc))
-f0 = monopitchProc(w, obsProbList)
+f0List = monopitchProc(w, obsProbList)
 
 mononoteProc = mononote.Processor(*mononote.parameterFromPYin(pyinProc))
 noteList = mononoteProc(w, obsProbList)
 
 fig = pl.figure()
 ax = pl.subplot(111)
-pl.plot(f0)
+pl.plot(f0List)
 for iNote, note in enumerate(noteList):
     freq = semitoneToFreq(note["pitch"])
     begin = note["begin"]

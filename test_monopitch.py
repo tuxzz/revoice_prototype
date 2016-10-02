@@ -10,7 +10,7 @@ pyinProc = pyin.Processor(sr)
 obsProbList = pyinProc(w)
 
 monopitchProc = monopitch.Processor(*monopitch.parameterFromPYin(pyinProc))
-f0 = monopitchProc(w, obsProbList)
+f0List = monopitchProc(w, obsProbList)
 
-pl.plot(f0)
+pl.plot(f0List)
 pl.show()
