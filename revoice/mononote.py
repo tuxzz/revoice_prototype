@@ -169,28 +169,6 @@ class Processor:
         path = self.viterbiDecoder(obsSeq)
         del obsSeq
 
-        # mark silent->attack bound as attack->stable
-        frameOffset = int(np.ceil(self.windowSize / self.hopSize / 4))
-        llState = 2
-        lastState = path[0] % 3
-        for iHop in range(1, nHop):
-            pitch = path[iHop] // 3
-            state = path[iHop] % 3
-            if(llState == 2 and lastState == 2 and state == 0):
-                prevNoteEnd = None
-                for jHop in reversed(range(0, iHop)):
-                    if(path[jHop] % 3 == 1):
-                        prevNoteEnd = jHop + 1
-                        break
-                if(prevNoteEnd is None):
-                    prevNoteEnd = -1
-                fillBegin = max(prevNoteEnd + 1, iHop - frameOffset)
-                if(fillBegin < iHop):
-                    path[fillBegin] = pitch * 3
-                    path[fillBegin + 1:iHop + 1] = pitch * 3 + 1
-            llState = lastState
-            lastState = state
-
         # track note
         noteList = []
         currNote = None
