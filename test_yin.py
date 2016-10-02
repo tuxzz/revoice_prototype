@@ -7,7 +7,7 @@ from revoice.common import *
 w, sr = loadWav("voices/yuri_orig.wav")
 
 yinProc = yin.Processor(sr)
-f0 = yinProc(w)
+f0List = yinProc(w)
 
-pl.plot(f0)
+pl.plot(f0List)
 pl.show()
