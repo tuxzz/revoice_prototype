@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.signal as sp
-import scipy.interpolate as ipl
 
 from .common import *
 from . import adaptivestft
