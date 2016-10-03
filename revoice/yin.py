@@ -6,12 +6,12 @@ from .common import *
 def difference(x):
     frameSize = len(x)
     outSize = frameSize // 2
-    out = np.zeros(outSize, dtype=np.float64)
+    out = np.zeros(outSize, dtype = np.float64)
 
     # POWER TERM CALCULATION
     # ... for the power terms in equation (7) in the Yin paper
 
-    powerTerms = np.zeros(outSize, dtype=np.float64)
+    powerTerms = np.zeros(outSize, dtype = np.float64)
     powerTerms[0] = np.sum(x[:outSize] ** 2)
 
     for i in range(1, outSize):
@@ -22,7 +22,7 @@ def difference(x):
     transformedAudio = np.fft.rfft(x)
 
     # 2. half of the data, disguised as a convolution kernel
-    kernel = np.zeros((frameSize), dtype=np.float64)
+    kernel = np.zeros((frameSize), dtype = np.float64)
     kernel[:outSize] = x[:outSize][::-1]
     transformedKernel = np.fft.rfft(kernel)
 

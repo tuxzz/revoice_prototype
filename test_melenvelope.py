@@ -18,7 +18,7 @@ magnList, _ = stftProc(w, f0List)
 envProc = melenvelope.Processor(sr)
 env = envProc(w, f0List)
 
-pl.imshow(env.T, interpolation='bicubic', aspect='auto', origin='lower')
+pl.imshow(env.T, interpolation = 'bicubic', aspect = 'auto', origin = 'lower')
 pl.plot(f0List / sr * envProc.fftSize)
 pl.figure()
 pl.plot(np.log(np.clip(magnList[100], 1e-6, np.inf)))

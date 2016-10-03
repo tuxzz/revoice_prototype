@@ -32,7 +32,7 @@ def saveWav(filename, data, samprate):
 def simpleDCRemove(x):
     return x - np.mean(x)
 
-@nb.jit(nb.types.Tuple((nb.int64, nb.int64, nb.int64, nb.int64))(nb.int64, nb.int64, nb.int64), nopython=True, cache=True)
+@nb.jit(nb.types.Tuple((nb.int64, nb.int64, nb.int64, nb.int64))(nb.int64, nb.int64, nb.int64), nopython = True, cache = True)
 def getFrameRange(inputLen, center, size):
     leftSize = int(size / 2)
     rightSize = size - leftSize # for odd size
@@ -45,16 +45,16 @@ def getFrameRange(inputLen, center, size):
 
     return outBegin, outEnd, inputBegin, inputEnd
 
-@nb.jit(nb.float64[:](nb.float64[:], nb.int64, nb.int64), nopython=True, cache=True)
+@nb.jit(nb.float64[:](nb.float64[:], nb.int64, nb.int64), nopython = True, cache = True)
 def getFrame(input, center, size):
-    out = np.zeros((size), input.dtype)
+    out = np.zeros(size, input.dtype)
 
     outBegin, outEnd, inputBegin, inputEnd = getFrameRange(len(input), center, size)
 
     out[outBegin:outEnd] = input[inputBegin:inputEnd]
     return out
 
-@nb.jit(nb.int64(nb.int64, nb.int64), nopython=True, cache=True)
+@nb.jit(nb.int64(nb.int64, nb.int64), nopython = True, cache = True)
 def getNFrame(inputSize, hopSize):
     return int(inputSize / hopSize + 1 if(inputSize % hopSize != 0) else inputSize / hopSize)
 
@@ -98,12 +98,6 @@ def parabolicInterpolation(input, i, val = True, overAdjust = False):
             return (x, y)
         else:
             return x
-
-def gaussianWindow(M):
-    iMid = M * 0.5
-    edge = np.exp(-12.0)
-    phase = (np.arange(M) - iMid) / M
-    return (np.exp(-48.0 * phase * phase) - edge) / (1.0 - edge)
 
 def fixIntoUnit(x):
     if(isinstance(x, complex)):

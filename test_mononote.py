@@ -24,5 +24,5 @@ for iNote, note in enumerate(noteList):
     freq = semitoneToFreq(note["pitch"])
     begin = note["begin"]
     end = note["end"]
-    ax.add_patch(patches.Rectangle((begin, freq - 5.0), end - begin, 10.0, alpha=0.39))
+    ax.add_patch(patches.Rectangle((begin, freq - 5.0), end - begin, 10.0, alpha = 0.39))
 pl.show()
