@@ -4,24 +4,12 @@ import scipy.signal as sp
 from .common import *
 
 class Processor:
-    windows = {
-        'hanning': (sp.hanning, 1.5),
-        'blackman': (sp.blackman, 1.73),
-        'blackmanharris': (sp.blackmanharris, 2.0),
-    }
-
     def __init__(self, sr, window = 'blackman'):
         self.samprate = float(sr)
         self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
         self.fftSize = roundUpToPowerOf2(self.samprate * 0.05)
         self.peakSearchRange = 0.3
-        if(type(window) is str):
-            self.window = self.windows[window]
-        elif(type(window) is tuple):
-            self.window = window
-            assert(len(self.window) == 2)
-        else:
-            raise TypeError("Invalid window.")
+        self.window = getWindow(window)
 
     def __call__(self, x, f0List, removeDC = True, refineF0 = False, bFac = 1.0):
         # constant

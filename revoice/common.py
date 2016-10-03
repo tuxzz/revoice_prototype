@@ -1,7 +1,14 @@
 import numpy as np
 import scipy.io.wavfile as wavfile
 import scipy.interpolate as ipl
+import scipy.signal as sp
 import numba as nb
+
+windowDict = {
+    'hanning': (sp.hanning, 1.5),
+    'blackman': (sp.blackman, 1.73),
+    'blackmanharris': (sp.blackmanharris, 2.0),
+}
 
 def loadWav(filename): # -> samprate, wave in float64
     samprate, w = wavfile.read(filename)
@@ -50,6 +57,15 @@ def getFrame(input, center, size):
 @nb.jit(nb.int64(nb.int64, nb.int64), nopython=True, cache=True)
 def getNFrame(inputSize, hopSize):
     return int(inputSize / hopSize + 1 if(inputSize % hopSize != 0) else inputSize / hopSize)
+
+def getWindow(window):
+    if(type(window) is str):
+        return windowDict[window]
+    elif(type(window) is tuple):
+        assert(len(window) == 2)
+        return window
+    else:
+        raise TypeError("Invalid window.")
 
 def roundUpToPowerOf2(v):
     return int(2 ** np.ceil(np.log2(v)))
