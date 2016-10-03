@@ -55,11 +55,10 @@ class Processor:
         linearX = melToFreq(melX)
 
         # apply filter and sum, then do sinc interpolation
-        out = np.zeros((nHop, nBin), dtype = np.float64)
         melSpectrum = np.zeros(nFilter, dtype = np.float64)
         for iHop in range(nHop):
             for iFilter in range(nFilter):
                 melSpectrum[iFilter] = np.sum(magnList[iHop] * filterBank[iFilter])
             melSpectrum = np.log(np.clip(melSpectrum, 1e-10, np.inf))
-            out[iHop] = ipl.interp1d(linearX, melSpectrum, kind = 'cubic')(fRange)
-        return out
+            magnList[iHop] = ipl.interp1d(linearX, melSpectrum, kind = 'cubic')(fRange)
+        return magnList
