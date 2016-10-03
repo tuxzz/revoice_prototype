@@ -89,6 +89,6 @@ class Processor:
                 else:
                     refinedF0List[iHop] = refinedF0
         ret = [magnList, phaseList]
-        if(refinedF0):
+        if(refineF0):
             ret.append(refinedF0List)
         return tuple(ret)
