@@ -63,7 +63,7 @@ class Processor:
         stftProc.fftSize, stftProc.hopSize = self.fftSize, self.hopSize
         magnList, _ = stftProc(x, f0List)
 
-        # apply true Envelope
+        # apply true envelope
         for iHop, f0 in enumerate(f0List):
             if(f0 > 0.0):
                 order = int(self.samprate / (2 * B * f0) * self.orderFac)
