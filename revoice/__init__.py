@@ -6,4 +6,4 @@ from . import monopitch
 from . import mononote
 from . import adaptivestft
 
-__all__ = ["common", "sparsehmm", "yin", "pyin", "monopitch", "mononote", "adaptivestft", "melenvelope", "trueenvelope"]
+__all__ = ["common", "sparsehmm", "yin", "pyin", "monopitch", "mononote", "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope"]
