@@ -14,7 +14,7 @@ f0List = monopitchProc(w, obsProbList)
 stftProc = adaptivestft.Processor(sr)
 magnList, phaseList, refinedF0List = stftProc(w, f0List, refineF0 = True)
 
-pl.imshow(magnList.T, interpolation='bicubic', aspect='auto', origin='lower')
+pl.imshow(np.log(np.clip(magnList, 1e-8, np.inf)).T, interpolation='bicubic', aspect='auto', origin='lower')
 pl.plot(f0List / sr * stftProc.fftSize, label = 'original f0')
 pl.plot(refinedF0List / sr * stftProc.fftSize, label = 'refined f0')
 pl.legend()

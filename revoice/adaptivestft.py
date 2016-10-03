@@ -60,7 +60,7 @@ class Processor:
             tSig[:halfWindowSize] = frame[halfWindowSize:]
             tSig[-halfWindowSize:] = frame[:halfWindowSize]
             fSig = np.fft.rfft(tSig)
-            magnList[iHop] = np.log(np.clip(np.abs(fSig) * windowNormFac, 1e-8, np.inf))
+            magnList[iHop] = np.abs(fSig) * windowNormFac
             phaseList[iHop] = np.unwrap(np.angle(fSig))
 
             if(refineF0 and f0 > 0.0):
