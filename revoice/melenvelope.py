@@ -4,7 +4,6 @@ import scipy.interpolate as ipl
 
 from .common import *
 from . import adaptivestft
-import pylab as pl
 
 class Processor:
     def __init__(self, sr, window = 'blackman'):
