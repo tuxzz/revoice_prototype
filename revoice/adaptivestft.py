@@ -4,12 +4,12 @@ import scipy.signal as sp
 from .common import *
 
 class Processor:
-    def __init__(self, sr, window = 'blackman'):
+    def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.fftSize = roundUpToPowerOf2(self.samprate * 0.05)
-        self.peakSearchRange = 0.3
-        self.window = getWindow(window)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
+        self.peakSearchRange = kwargs.get("peakSearchRange", 0.3)
+        self.window = getWindow(kwargs.get("window", "blackman"))
 
     def __call__(self, x, f0List, removeDC = True, refineF0 = False, bFac = 1.0):
         # constant

@@ -2,20 +2,17 @@ import numpy as np
 import scipy.signal as sp
 
 from .common import *
-from . import adaptivestft
 
 class Processor:
-    def __init__(self, sr, window = 'blackman'):
-        self.samprate = sr
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.fftSize = roundUpToPowerOf2(self.samprate * 0.05)
-        self.window = getWindow(window)
-        self.orderFac = 1.0
-        self.nIter = 24
-        self.maxStep = 1.5
-        self.filterKernelSize = 65
-        self.filterCutoff = 0.03
-        self.filterTransExp = 8
+    def __init__(self, sr, **kwargs):
+        self.samprate = float(sr)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
+        self.window = getWindow(kwargs.get("window", "blackman"))
+
+        self.filterKernelSize = kwargs.get("filterKernelSize", 65)
+        self.filterCutoff = kwargs.get("filterCutoff", 0.03)
+        self.filterTransExp = kwargs.get("filterTransExp", 8)
 
     def __call__(self, x, f0List):
         # constant

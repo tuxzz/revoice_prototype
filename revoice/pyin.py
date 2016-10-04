@@ -13,22 +13,22 @@ def normalized_pdf(a, b, begin, end, number):
     return v / np.sum(v)
 
 class Processor:
-    def __init__(self, sr):
+    def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.windowSize = roundUpToPowerOf2(self.samprate * 0.025)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.windowSize = kwargs.get("windowSize", roundUpToPowerOf2(self.samprate * 0.025))
 
-        self.minFreq = 80.0
-        self.maxFreq = 1000.0
+        self.minFreq = kwargs.get("minFreq", 80.0)
+        self.maxFreq = kwargs.get("maxFreq", 1000.0)
 
-        self.valleyThreshold = 0.5
-        self.valleyStep = 0.01
+        self.valleyThreshold = kwargs.get("valleyThreshold", 0.5)
+        self.valleyStep = kwargs.get("valleyStep", 0.01)
 
-        self.probThreshold = 0.02
-        self.weightPrior = 5.0
-        self.bias = 1.0
+        self.probThreshold = kwargs.get("probThreshold", 0.02)
+        self.weightPrior = kwargs.get("weightPrior", 5.0)
+        self.bias = kwargs.get("bias", 1.0)
 
-        self.pdf = normalized_pdf(1.7, 6.8, 0.0, 1.0, 128)
+        self.pdf = kwargs.get("pdf", normalized_pdf(1.7, 6.8, 0.0, 1.0, 128))
 
     def processSingle(self, x):
         nX = len(x)

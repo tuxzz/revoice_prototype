@@ -35,14 +35,15 @@ def calcTrueEnvelope(x, order, nIter = 24, maxStep = 1.5):
     return v.real
 
 class Processor:
-    def __init__(self, sr, window = 'blackman'):
-        self.samprate = sr
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.fftSize = roundUpToPowerOf2(self.samprate * 0.05)
-        self.window = getWindow(window)
-        self.orderFac = 1.0
-        self.nIter = 24
-        self.maxStep = 1.5
+    def __init__(self, sr, **kwargs):
+        self.samprate = float(sr)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
+        self.window = getWindow(kwargs.get("window", "blackman"))
+        
+        self.orderFac = kwargs.get("orderFac", 1.0)
+        self.nIter = kwargs.get("nIter", 24)
+        self.maxStep = kwargs.get("maxStep", 1.5)
 
     def __call__(self, x, f0List):
         # constant
@@ -58,8 +59,7 @@ class Processor:
         assert(x.ndim == 1)
 
         # analyze magnitude
-        stftProc = adaptivestft.Processor(self.samprate, window = self.window)
-        stftProc.fftSize, stftProc.hopSize = self.fftSize, self.hopSize
+        stftProc = adaptivestft.Processor(self.samprate, window = self.window, fftSize = self.fftSize, hopSize = self.hopSize)
         magnList, _ = stftProc(x, f0List)
 
         # apply true envelope

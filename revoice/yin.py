@@ -65,16 +65,16 @@ def findValleys(x, minFreq, maxFreq, sr, threshold = 0.5, step = 0.01):
     return ret
 
 class Processor:
-    def __init__(self, sr):
+    def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.windowSize = roundUpToPowerOf2(self.samprate * 0.025)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.windowSize = kwargs.get("windowSize", roundUpToPowerOf2(self.samprate * 0.025))
 
-        self.minFreq = 80.0
-        self.maxFreq = 1000.0
+        self.minFreq = kwargs.get("minFreq", 80.0)
+        self.maxFreq = kwargs.get("maxFreq", 1000.0)
 
-        self.valleyThreshold = 0.5
-        self.valleyStep = 0.01
+        self.valleyThreshold = kwargs.get("valleyThreshold", 0.5)
+        self.valleyStep = kwargs.get("valleyStep", 0.01)
 
     def processSingle(self, x):
         nX = len(x)

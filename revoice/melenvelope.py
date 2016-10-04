@@ -6,13 +6,13 @@ from .common import *
 from . import adaptivestft
 
 class Processor:
-    def __init__(self, sr, window = 'blackman'):
-        self.samprate = sr
-        self.hopSize = roundUpToPowerOf2(self.samprate * 0.0025)
-        self.fftSize = roundUpToPowerOf2(self.samprate * 0.05)
-        self.window = window
-        self.firstFilter = 0.0 # in mel
-        self.filterDistance = 100.0 # in mel
+    def __init__(self, sr, **kwargs):
+        self.samprate = float(sr)
+        self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
+        self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
+        self.window = getWindow(kwargs.get("window", "blackman"))
+        self.firstFilter = kwargs.get("firstFilter", 0.0) # in mel
+        self.filterDistance = kwargs.get("filterDistance", 100.0) # in mel
 
     def __call__(self, x, f0List):
         # constant
@@ -44,8 +44,7 @@ class Processor:
                 filterBank[iFilter] /= bankSum
 
         # analyze magnitude
-        stftProc = adaptivestft.Processor(self.samprate, window = self.window)
-        stftProc.fftSize, stftProc.hopSize = self.fftSize, self.hopSize
+        stftProc = adaptivestft.Processor(self.samprate, window = self.window, fftSize = self.fftSize, hopSize = self.hopSize)
         magnList, _ = stftProc(x, f0List)
 
         # gen frequency table
