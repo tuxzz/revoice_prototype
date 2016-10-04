@@ -19,7 +19,7 @@ class Processor:
         self.maxTransSemitone = maxTransSemitone
         self.minFreq = minFreq
         self.binPerSemitone = kwargs.get("binPerSemitone", 5)
-        self.transSelf = kwargs.get("transSelf", 0.99)
+        self.transSelf = kwargs.get("transSelf", 0.999)
         self.yinTrust = kwargs.get("yinTrust", 0.5)
         self.energyThreshold = kwargs.get("energyThreshold", 1e-8)
 
