@@ -27,7 +27,7 @@ def loadWav(filename): # -> samprate, wave in float64
     return w, samprate
 
 def saveWav(filename, data, samprate):
-    wavfile.write(filename, samprate, data)
+    wavfile.write(filename, int(samprate), data)
 
 def simpleDCRemove(x):
     return x - np.mean(x)
@@ -107,6 +107,9 @@ def fixIntoUnit(x):
         x[need] = (1 + 0j) / np.conj(x[need])
         return x
 
+def lerp(a, b, ratio):
+    return a + (b - a) * ratio
+
 def formantFreq(n, L = 0.168, c = 340.29):
     return (2 * n - 1) * c / 4 / L
 
@@ -124,3 +127,6 @@ def freqToSemitone(freq):
 
 def semitoneToFreq(semi):
     return np.power(2, (semi - 69.0) / 12.0) * 440.0
+
+def calcSRER(x, y):
+    return np.log10(np.std(x) / np.std(x - y)) * 20.0
