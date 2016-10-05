@@ -5,6 +5,7 @@ from .common import *
 
 def difference(x):
     frameSize = len(x)
+    paddedSize = roundUpToPowerOf2(frameSize)
     outSize = frameSize // 2
     out = np.zeros(outSize, dtype = np.float64)
 
@@ -19,20 +20,21 @@ def difference(x):
 
     # YIN-STYLE ACF via FFT
     # 1. data
-    transformedAudio = np.fft.rfft(x)
+    transformedAudio = np.fft.rfft(x, n = paddedSize)
 
     # 2. half of the data, disguised as a convolution kernel
-    kernel = np.zeros((frameSize), dtype = np.float64)
+    kernel = np.zeros(frameSize, dtype = np.float64)
     kernel[:outSize] = x[:outSize][::-1]
-    transformedKernel = np.fft.rfft(kernel)
+    transformedKernel = np.fft.rfft(kernel, n = paddedSize)
 
     # 3. convolution
     yinStyleACF = transformedAudio * transformedKernel
-    transformedAudio = np.fft.irfft(yinStyleACF)
+    correlation = np.fft.irfft(yinStyleACF)
 
     # CALCULATION OF difference function
     # according to (7) in the Yin paper
-    out = powerTerms[0] + powerTerms - 2 * transformedAudio[outSize - 1:-1]
+    out = powerTerms[0] + powerTerms - 2 * correlation[outSize - 1:frameSize - 1]
+
     return out
 
 @nb.jit(nb.float64[:](nb.float64[:]), cache=True)
@@ -68,38 +70,23 @@ class Processor:
     def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
         self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
-        self.windowSize = kwargs.get("windowSize", roundUpToPowerOf2(self.samprate * 0.025))
 
         self.minFreq = kwargs.get("minFreq", 80.0)
         self.maxFreq = kwargs.get("maxFreq", 1000.0)
+        self.windowSize = kwargs.get("windowSize", max(roundUpToPowerOf2(self.samprate / self.minFreq * 2), self.hopSize * 4))
 
         self.valleyThreshold = kwargs.get("valleyThreshold", 0.5)
         self.valleyStep = kwargs.get("valleyStep", 0.01)
 
-    def processSingle(self, x):
-        nX = len(x)
-        buffSize = nX // 2
-        sr = self.samprate
-
-        buff = difference(x)
-        buff = cumulativeDifference(buff)
-
-        valleys = findValleys(buff, self.minFreq, self.maxFreq, sr, threshold = self.valleyThreshold, step = self.valleyStep)
-
-        if(valleys):
-            return sr / parabolicInterpolation(buff, valleys[-1], val = False)
-        else:
-            return 0.0
-
     def __call__(self, x, removeDC = True):
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
-
         out = np.zeros(nHop, dtype = np.float64)
         for iHop in range(nHop):
             frame = getFrame(x, iHop * self.hopSize, self.windowSize)
-            if(removeDC):
-                frame = simpleDCRemove(frame)
-            out[iHop] = self.processSingle(frame)
+            buff = difference(frame)
+            buff = cumulativeDifference(buff)
+            valleyIndexList = findValleys(buff, self.minFreq, self.maxFreq, self.samprate, threshold = self.valleyThreshold, step = self.valleyStep)
+            out[iHop] = self.samprate / parabolicInterpolation(buff, valleyIndexList[-1], val = False) if(valleyIndexList) else 0.0
 
         return out

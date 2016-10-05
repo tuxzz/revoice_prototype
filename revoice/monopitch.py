@@ -5,16 +5,16 @@ from . import sparsehmm
 
 def parameterFromPYin(pyin):
     hopSize = pyin.hopSize
-    windowSize = pyin.windowSize
+    samprate = pyin.samprate
     nSemitone = int(np.ceil(np.log2(pyin.maxFreq / pyin.minFreq) * 12.0))
     maxTransSemitone = (pyin.hopSize / pyin.samprate) / (256.0 / 44100.0) * 3.0
-    minFreq = pyin.minFreq
-    return hopSize, windowSize, nSemitone, maxTransSemitone, minFreq
+    minFreq = 62.375
+    return hopSize, samprate, nSemitone, maxTransSemitone, minFreq
 
 class Processor:
-    def __init__(self, hopSize, windowSize, nSemitone, maxTransSemitone, minFreq, **kwargs):
+    def __init__(self, hopSize, samprate, nSemitone, maxTransSemitone, minFreq, **kwargs):
         self.hopSize = int(hopSize)
-        self.windowSize = int(windowSize)
+        self.samprate = samprate
         self.nSemitone = nSemitone
         self.maxTransSemitone = maxTransSemitone
         self.minFreq = minFreq
@@ -126,18 +126,24 @@ class Processor:
         for iHop in range(nHop):
             if(path[iHop] < nBin):
                 hmmFreq = self.minFreq * np.power(2, path[iHop] / (12.0 * self.binPerSemitone))
-                iNearest = np.argmin(np.abs(obsProbList[iHop].T[0] - hmmFreq))
-                bestFreq = obsProbList[iHop][iNearest][0]
-                if(bestFreq < self.minFreq or bestFreq > maxFreq or abs(np.log2(bestFreq / self.minFreq) * 12 * self.binPerSemitone - path[iHop]) > 1.0):
+                if(len(obsProbList[iHop]) == 0):
                     bestFreq = hmmFreq
+                else:
+                    iNearest = np.argmin(np.abs(obsProbList[iHop].T[0] - hmmFreq))
+                    bestFreq = obsProbList[iHop][iNearest][0]
+                    if(bestFreq < self.minFreq or bestFreq > maxFreq or abs(np.log2(bestFreq / self.minFreq) * 12 * self.binPerSemitone - path[iHop]) > 1.0):
+                        bestFreq = hmmFreq
             else:
                 bestFreq = -self.minFreq * np.power(2, (path[iHop] - nBin) / (12 * self.binPerSemitone))
             out[iHop] = bestFreq
 
         # mark unvoiced->voiced bound as voiced
-        frameOffset = int(np.ceil(self.windowSize / self.hopSize / 4))
         for iHop in range(1, nHop):
             if(out[iHop - 1] <= 0.0 and out[iHop] > 0.0):
+                windowSize = max(int(2 ** round(np.log2(self.samprate / out[iHop] * 2))), self.hopSize * 4)
+                if(windowSize % 2 == 1):
+                    windowSize += 1
+                frameOffset = int(round(windowSize / self.hopSize / 2))
                 out[max(0, iHop - frameOffset):iHop] = out[iHop]
 
         # mark silent frame as unvoiced

@@ -18,15 +18,13 @@ from . import sparsehmm
 
 def parameterFromPYin(pyin):
     hopSize = pyin.hopSize
-    windowSize = pyin.windowSize
     minSemitone = int(freqToSemitone(pyin.minFreq))
     nSemitone = int(np.ceil(freqToSemitone(pyin.maxFreq)) - minSemitone)
-    return hopSize, windowSize, minSemitone, nSemitone
+    return hopSize, minSemitone, nSemitone
 
 class Processor:
-    def __init__(self, hopSize, windowSize, minSemitone, nSemitone, **kwargs):
+    def __init__(self, hopSize, minSemitone, nSemitone, **kwargs):
         self.hopSize = int(hopSize)
-        self.windowSize = int(windowSize)
         self.minSemitone = minSemitone
         self.nSemitone = nSemitone
 
@@ -143,8 +141,10 @@ class Processor:
         if(probSum > 0.0):
             out[np.arange(0, nState, step = 3)] *= probPitched / probSum
             out[np.arange(1, nState, step = 3)] *= probPitched / probSum
-        out[np.arange(0, nState, step = 3)] += meanEnergy
-        out[np.arange(1, nState, step = 3)] += meanEnergy
+        out[np.arange(0, nState, step = 3)] += meanEnergy / nBin / 2
+        out[np.arange(1, nState, step = 3)] += meanEnergy / nBin / 2
+        probPitched += meanEnergy
+        probPitched = min(probPitched, 0.9999)
         out[np.arange(2, nState, step = 3)] = (1.0 - probPitched) / nBin
 
         return out
@@ -162,7 +162,7 @@ class Processor:
         # decode
         obsSeq = np.zeros((nHop, nState), dtype = np.float64)
         for iHop in range(nHop):
-            frame = getFrame(x, iHop * self.hopSize, self.windowSize)
+            frame = getFrame(x, iHop * self.hopSize, 2 * self.hopSize)
             frame = simpleDCRemove(frame)
             meanEnergy = np.mean(frame ** 2)
             obsSeq[iHop] = self.calcStateProb(obsProbList[iHop], meanEnergy)
