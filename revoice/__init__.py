@@ -8,5 +8,6 @@ from . import adaptivestft
 from . import melenvelope
 from . import trueenvelope
 from . import mfienvelope
+from . import hnm
 
-__all__ = ["common", "sparsehmm", "yin", "pyin", "monopitch", "mononote", "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope"]
+__all__ = ["common", "sparsehmm", "yin", "pyin", "monopitch", "mononote", "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope", "hnm"]
