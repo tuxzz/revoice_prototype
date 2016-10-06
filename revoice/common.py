@@ -130,3 +130,6 @@ def semitoneToFreq(semi):
 
 def calcSRER(x, y):
     return np.log10(np.std(x) / np.std(x - y)) * 20.0
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
