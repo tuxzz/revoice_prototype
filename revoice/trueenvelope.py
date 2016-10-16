@@ -39,8 +39,8 @@ class Processor:
         self.samprate = float(sr)
         self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
         self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
-        self.window = getWindow(kwargs.get("window", "blackman"))
-        
+        self.window = kwargs.get("window", "blackman")
+
         self.orderFac = kwargs.get("orderFac", 1.0)
         self.nIter = kwargs.get("nIter", 24)
         self.maxStep = kwargs.get("maxStep", 1.5)
@@ -50,7 +50,7 @@ class Processor:
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
         nBin = self.fftSize // 2 + 1
-        B = self.window[1]
+        B = getWindow(self.window)[1]
         avgF0 = np.mean(f0List[f0List > 0.0])
 
         # check input

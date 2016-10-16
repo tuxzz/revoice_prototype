@@ -43,8 +43,7 @@ class Processor:
                 windowSize += 1
             halfWindowSize = windowSize // 2
             window = sp.gaussian(windowSize, stdev)
-            window /= np.sqrt(np.mean(window ** 2))
-            window *= 2 / np.sum(window)
+            window *= 2 / sumGaussian(windowSize, stdev)
             maxSpec = np.full(nBin, -np.inf)
             minBin = np.full(nBin, np.inf)
             integratedSpec = np.zeros(nBin)

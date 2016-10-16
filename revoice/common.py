@@ -2,12 +2,14 @@ import numpy as np
 import scipy.io.wavfile as wavfile
 import scipy.interpolate as ipl
 import scipy.signal as sp
+import scipy.special as spec
 import numba as nb
 
 windowDict = {
-    'hanning': (sp.hanning, 1.5),
-    'blackman': (sp.blackman, 1.73),
-    'blackmanharris': (sp.blackmanharris, 2.0),
+    #           func(N), main-lobe-width, mean
+    'hanning': (sp.hanning, 1.5, 0.5),
+    'blackman': (sp.blackman, 1.73, 0.42),
+    'blackmanharris': (sp.blackmanharris, 2.0044, (35875 - 3504 * np.pi) / 100000),
 }
 
 def loadWav(filename): # -> samprate, wave in float64
@@ -31,6 +33,18 @@ def saveWav(filename, data, samprate):
 
 def simpleDCRemove(x):
     return x - np.mean(x)
+
+def _sumGaussian(x, stdev):
+    return np.sqrt(np.pi) * stdev * spec.erf(x / np.sqrt(2) / stdev) / np.sqrt(2)
+
+def sumGaussian(n, stdev):
+    return _sumGaussian(n - 1, stdev) - _sumGaussian(1 - n, stdev)
+
+def _sumGaussianSquare(x, stdev):
+    return np.sqrt(np.pi) * stdev * spec.erf(x / stdev) / 2.0
+
+def sumGaussianSquare(n, stdev):
+    return _sumGaussianSquare(n - 1, stdev) - _sumGaussianSquare(1 - n, stdev)
 
 @nb.jit(nb.types.Tuple((nb.int64, nb.int64, nb.int64, nb.int64))(nb.int64, nb.int64, nb.int64), nopython = True, cache = True)
 def getFrameRange(inputLen, center, size):
@@ -62,7 +76,7 @@ def getWindow(window):
     if(type(window) is str):
         return windowDict[window]
     elif(type(window) is tuple):
-        assert(len(window) == 2)
+        assert(len(window) == 3)
         return window
     else:
         raise TypeError("Invalid window.")

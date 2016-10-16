@@ -9,14 +9,14 @@ class Processor:
         self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
         self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
         self.peakSearchRange = kwargs.get("peakSearchRange", 0.3)
-        self.window = getWindow(kwargs.get("window", "blackman"))
+        self.window = kwargs.get("window", "blackman")
 
     def __call__(self, x, f0List, removeDC = True, refineF0 = False, bFac = 1.0):
         # constant
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
         nBin = self.fftSize // 2 + 1
-        windowFunc, B = self.window
+        windowFunc, B, windowMean = getWindow(self.window)
         B *= bFac
 
         # check input
@@ -38,7 +38,7 @@ class Processor:
                 windowSize = self.hopSize * 2
                 halfWindowSize = self.hopSize
             window = windowFunc(windowSize)
-            windowNormFac = 2.0 / np.sum(window)
+            windowNormFac = 2.0 / (windowMean * windowSize)
             frame = getFrame(x, iHop * self.hopSize, windowSize)
             frame *= window
             if(removeDC):

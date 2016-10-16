@@ -21,7 +21,7 @@ def hmToSinusoid(fkHat, ak):
 class Slover:
     def __init__(self, mvf, sr, **kwargs):
         self.samprate = float(sr)
-        self.window = getWindow(kwargs.get("window", "blackman"))
+        self.window = kwargs.get("window", "blackman")
 
         self.mvf = float(mvf)
         self.stepMaxCorrect = kwargs.get("stepMaxCorrect", 20.0)
@@ -50,7 +50,7 @@ class Slover:
 
         self.K = nHar * 2 + 1
         N = (nX - 1) // 2
-        self.windowArray = self.window[0](nX).reshape(nX, 1)
+        self.windowArray = getWindow(self.window)[0](nX).reshape(nX, 1)
         self.fkHat = np.arange(-self.nHar, self.nHar + 1).reshape(self.K, 1) * self.f0
         self.n = np.arange(-N, N + 1).reshape(1, nX)
         self.windowedX = x.reshape(nX, 1) * self.windowArray
@@ -74,7 +74,7 @@ class Slover:
 class Processor:
     def __init__(self, mvf, sr, **kwargs):
         self.samprate = float(sr)
-        self.window = getWindow(kwargs.get("window", "blackman"))
+        self.window = kwargs.get("window", "blackman")
         self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.005))
         self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
 
@@ -91,7 +91,7 @@ class Processor:
         # constant
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
-        windowFunc, B = self.window
+        windowFunc, B, windowMean = getWindow(self.window)
         synthRange = np.arange(-self.hopSize, self.hopSize)
         synthWindow = np.hanning(2 * self.hopSize)
         f0List = f0List.copy()

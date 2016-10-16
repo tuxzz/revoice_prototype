@@ -36,19 +36,18 @@ def synthSinusoid(hFreq, hAmp, hPhase, r, sr):
 
 def filterNoise(x, noiseEnvList, hopSize):
     olaFac = 2
+    windowFac = 4
     nHop, noiseEnvBin = noiseEnvList.shape
-    windowSize = hopSize * 4
+    windowSize = hopSize * windowFac
     nBin = windowSize // 2 + 1
     nX = len(x)
 
     assert(getNFrame(nX, hopSize) == nHop)
     assert(hopSize % olaFac == 0)
 
-    window = np.hanning(windowSize)
-    analyzeNormFac = 0.5 * np.sum(window)
-    synthNormScale = 0.0
-    for i in range(0, windowSize, hopSize // olaFac):
-        synthNormScale += window[i]
+    window, windowMean = np.hanning(windowSize), 0.5
+    analyzeNormFac = 0.5 * windowMean * windowSize
+    synthNormScale = windowFac // 2 * olaFac
 
     window = np.sqrt(window)
     buff = np.zeros(nBin, dtype = np.complex128)
