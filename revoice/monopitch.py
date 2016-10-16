@@ -1,7 +1,7 @@
 import numpy as np
 
 from .common import *
-from . import sparsehmm
+from . import hmm
 
 def parameterFromPYin(pyin):
     hopSize = pyin.hopSize
@@ -23,7 +23,7 @@ class Processor:
         self.yinTrust = kwargs.get("yinTrust", 0.5)
         self.energyThreshold = kwargs.get("energyThreshold", 1e-8)
 
-        self.viterbiDecoder = self.createModel()
+        self.model = self.createModel()
 
     def createModel(self):
         nBin = int(self.nSemitone * self.binPerSemitone)
@@ -70,11 +70,11 @@ class Processor:
                 transProb[iA + 3] = weights[i - minNextBin] / weightSum * (1.0 - self.transSelf)
                 iA += 4
 
-        return sparsehmm.ViterbiDecoder(init, frm, to, transProb)
+        return hmm.SparseHMM(init, frm, to, transProb)
 
     def calcStateProb(self, obsProb):
         nBin = int(self.nSemitone * self.binPerSemitone)
-        nState = len(self.viterbiDecoder.init)
+        nState = len(self.model.init)
         maxFreq = self.minFreq * np.power(2, self.nSemitone / 12)
         probYinPitched = 0.0
 
@@ -99,7 +99,7 @@ class Processor:
     def __call__(self, x, obsProbList):
         # constant
         nBin = int(self.nSemitone * self.binPerSemitone)
-        nState = len(self.viterbiDecoder.init)
+        nState = len(self.model.init)
         maxFreq = self.minFreq * np.power(2, self.nSemitone / 12)
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
@@ -118,7 +118,7 @@ class Processor:
         obsSeq = np.zeros((nHop, nState), dtype = np.float64)
         for iHop in range(nHop):
             obsSeq[iHop] = self.calcStateProb(obsProbList[iHop])
-        path = self.viterbiDecoder(obsSeq)
+        path = self.model.viterbiDecode(obsSeq)
         del obsSeq
 
         # extract frequency from path

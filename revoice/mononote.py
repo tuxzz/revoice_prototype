@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as ss
 
 from .common import *
-from . import sparsehmm
+from . import hmm
 
 # * case state % 3:
 #    0: attack
@@ -42,7 +42,7 @@ class Processor:
         self.yinStableSigma = kwargs.get("yinStableSigma", 0.8)
         self.yinTrust = kwargs.get("yinTrust", 0.1)
 
-        self.viterbiDecoder = self.createModel()
+        self.model = self.createModel()
 
     def createModel(self):
         nBin = int(self.nSemitone * self.binPerSemitone)
@@ -109,11 +109,11 @@ class Processor:
                     iA += 1
             transProb[beginIA:iA] /= silentProbSum
 
-        return sparsehmm.ViterbiDecoder(init, frm, to, transProb)
+        return hmm.SparseHMM(init, frm, to, transProb)
 
     def calcStateProb(self, obsProb, meanEnergy):
         obsProb = np.asarray(obsProb)
-        nState = len(self.viterbiDecoder.init)
+        nState = len(self.model.init)
         assert(obsProb.ndim == 2)
         assert(obsProb.shape[1] == 2)
 
@@ -154,7 +154,7 @@ class Processor:
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
         nBin = int(self.nSemitone * self.binPerSemitone)
-        nState = len(self.viterbiDecoder.init)
+        nState = len(self.model.init)
 
         # check input
         assert(nHop == len(obsProbList))
@@ -166,7 +166,7 @@ class Processor:
             frame = simpleDCRemove(frame)
             meanEnergy = np.mean(frame ** 2)
             obsSeq[iHop] = self.calcStateProb(obsProbList[iHop], meanEnergy)
-        path = self.viterbiDecoder(obsSeq)
+        path = self.model.viterbiDecode(obsSeq)
         del obsSeq
 
         # track note
