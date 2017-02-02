@@ -48,7 +48,7 @@ def sumGaussianSquare(n, stdev):
 
 @nb.jit(nb.types.Tuple((nb.int64, nb.int64, nb.int64, nb.int64))(nb.int64, nb.int64, nb.int64), nopython = True, cache = True)
 def getFrameRange(inputLen, center, size):
-    leftSize = int(size / 2)
+    leftSize = size // 2
     rightSize = size - leftSize # for odd size
 
     inputBegin = min(inputLen, max(center - leftSize, 0))
@@ -70,7 +70,7 @@ def getFrame(input, center, size):
 
 @nb.jit(nb.int64(nb.int64, nb.int64), nopython = True, cache = True)
 def getNFrame(inputSize, hopSize):
-    return int(inputSize / hopSize + 1 if(inputSize % hopSize != 0) else inputSize / hopSize)
+    return inputSize // hopSize + 1 if(inputSize % hopSize != 0) else inputSize // hopSize
 
 def getWindow(window):
     if(type(window) is str):
@@ -80,6 +80,9 @@ def getWindow(window):
         return window
     else:
         raise TypeError("Invalid window.")
+
+def mavg(x, order):
+    return sp.fftconvolve(x, np.full(order, 1.0 / order))[order // 2:order // 2 + len(x)]
 
 def roundUpToPowerOf2(v):
     return int(2 ** np.ceil(np.log2(v)))
