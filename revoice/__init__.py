@@ -12,5 +12,13 @@ from . import cheaptrick
 from . import hnm
 from . import hnm_qfft
 from . import hnm_qhm
+from . import pitchtransform
+from . import timetransform
 
-__all__ = ["common", "hmm", "yin", "pyin", "monopitch", "mononote", "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope", "cheaptrick", "hnm", "hnm_qfft", "hnm_qhm"]
+__all__ = [
+    "common", "hmm",
+    "yin", "pyin", "monopitch", "mononote",
+    "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope", "cheaptrick",
+    "hnm", "hnm_qfft", "hnm_qhm",
+    "pitchtransform", "timetransform"
+]

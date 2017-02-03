@@ -31,6 +31,26 @@ def loadWav(filename): # -> samprate, wave in float64
 def saveWav(filename, data, samprate):
     wavfile.write(filename, int(samprate), data)
 
+def splitArray(seq, cond = lambda v:v <= 0.0 or np.isnan(v)):
+    if(len(seq) == 0):
+        return []
+    o = []
+    n = len(seq)
+    last = 0
+    i = 0
+    while(i < n):
+        if(cond(seq[i])):
+            if(last != i):
+                o.append(seq[last:i])
+            last = i
+            while(i < n and cond(seq[i])): i += 1
+            o.append(seq[last:i])
+            last = i
+        i += 1
+    if(last != n):
+        o.append(seq[last:])
+    return o
+
 def simpleDCRemove(x):
     return x - np.mean(x)
 
