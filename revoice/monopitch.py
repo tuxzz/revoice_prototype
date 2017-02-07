@@ -27,7 +27,7 @@ class Processor:
 
     def createModel(self):
         nBin = int(self.nSemitone * self.binPerSemitone)
-        halfMaxTransBin = int((self.maxTransSemitone * self.binPerSemitone) // 2)
+        halfMaxTransBin = int(round((self.maxTransSemitone * self.binPerSemitone) / 2))
         nState = 2 * nBin
         nTrans = 4 * (nBin * (2 * halfMaxTransBin + 1) - halfMaxTransBin * (halfMaxTransBin + 1))
         init = np.ndarray(nState, dtype = np.float64)
@@ -35,7 +35,7 @@ class Processor:
         to = np.zeros(nTrans, dtype = np.int)
         transProb = np.zeros(nTrans, dtype = np.float64)
 
-        init.fill(1.0 / (2 * nBin))
+        init.fill(1.0 / nState)
         iA = 0
         for iBin in range(nBin):
             theoreticalMinNextBin = iBin - halfMaxTransBin

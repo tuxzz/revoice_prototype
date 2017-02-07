@@ -144,6 +144,33 @@ def fixIntoUnit(x):
         x[need] = (1 + 0j) / np.conj(x[need])
         return x
 
+def formantFreq(n, L = 0.168, c = 340.29):
+    return (2 * n - 1) * c / 4 / L
+
+def countFormant(freq, L = 0.168, c = 340.29):
+    return int(round((freq * 4 * L / c + 1) / 2))
+
+def preEmphasisResponse(x, freq, sr):
+    x = np.asarray(x)
+    a = np.exp(-2.0 * np.pi * freq / sr)
+    z = np.exp(2j * np.pi * x / sr)
+    return np.abs(1 - a / z)
+
+def preEmphasis(x, freq, sr):
+    o = np.zeros(len(x))
+    fac = np.exp(-2.0 * np.pi * freq / sr)
+    o[0] = x[0]
+    o[1:] = x[1:] - x[:-1] * fac
+    return o
+
+def deEmphasis(x, freq, sr):
+    o = x.copy()
+    fac = np.exp(-2.0 * np.pi * freq / sr)
+
+    for i in range(1, len(x)):
+        o[i] += o[i - 1] * fac
+    return o
+
 def lerp(a, b, ratio):
     return a + (b - a) * ratio
 

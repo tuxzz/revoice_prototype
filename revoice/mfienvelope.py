@@ -8,7 +8,6 @@ class Processor:
         self.samprate = float(sr)
         self.hopSize = kwargs.get("hopSize", roundUpToPowerOf2(self.samprate * 0.0025))
         self.fftSize = kwargs.get("fftSize", roundUpToPowerOf2(self.samprate * 0.05))
-        self.window = getWindow(kwargs.get("window", "blackman"))
 
         self.filterKernelSize = kwargs.get("filterKernelSize", 65)
         self.filterCutoff = kwargs.get("filterCutoff", 0.03)

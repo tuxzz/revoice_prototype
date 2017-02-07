@@ -3,7 +3,7 @@ import scipy.signal as sp
 
 from .common import *
 from . import adaptivestft
-from . import mfienvelope
+from . import cheaptrick
 from . import hnm_qfft
 from . import hnm_qhm
 
@@ -138,7 +138,7 @@ class Analyzer:
         noise = x - sinusoid # extract noise
 
         # build noise envelope
-        envProc = mfienvelope.Processor(self.samprate, hopSize = self.hopSize, fftSize = self.fftSize)
+        envProc = cheaptrick.Processor(self.samprate, hopSize = self.hopSize, fftSize = self.fftSize)
         noiseEnvList = envProc(noise, f0List)
 
         # record noise energy
