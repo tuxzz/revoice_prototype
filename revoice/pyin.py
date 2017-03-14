@@ -20,6 +20,7 @@ class Processor:
         self.minFreq = kwargs.get("minFreq", 80.0)
         self.maxFreq = kwargs.get("maxFreq", 1000.0)
         self.maxIter = 4
+        self.prefilter = kwargs.get("prefilter", True)
 
         self.valleyThreshold = kwargs.get("valleyThreshold", 1.0)
         self.valleyStep = kwargs.get("valleyStep", 0.01)
@@ -44,6 +45,11 @@ class Processor:
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
         pdfSize = len(self.pdf)
+
+        if(removeDC):
+            x = simpleDCRemove(x)
+        if(self.prefilter):
+            x = yin.doPrefilter(x, self.maxFreq, self.samprate)
 
         out = []
         for iHop in range(nHop):

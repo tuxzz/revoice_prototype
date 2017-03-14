@@ -127,7 +127,7 @@ class ParameterOptimizer:
         iplX = np.arange(len(envelope)) / fftSize * sr
         return ipl.interp1d(iplX, envelope * fac, kind = 'linear')
 
-    def __call__(self, x, y, initFList, initBwList, initAmpList, rate = 1.0, preOptimizeReferenceGetter = None):
+    def optimizeSingleFrame(self, x, y, initFList, initBwList, initAmpList, rate = 1.0, preOptimizeReferenceGetter = None):
         origOrder = np.argsort(initFList)
         FList = initFList[origOrder]
         bwList = initBwList[origOrder]
@@ -165,14 +165,14 @@ class ParameterOptimizer:
 
         return FList[origOrder], bwList[origOrder], ampList[origOrder]
 
-    def optimizeAutoJitter(self, x, y, initFList, initBwList, preOptimizeReferenceGetter, rate = 1.0, nJitter = 32):
+    def optimizeSingleFrameAutoJitter(self, x, y, initFList, initBwList, preOptimizeReferenceGetter, rate = 1.0, nJitter = 32):
         nFilter = len(initFList)
 
         cost = []
         param = []
 
         ampList = preOptimizeReferenceGetter(initFList)
-        FList, bwList, ampList = self(x, y, initFList, initBwList, ampList, rate = rate, preOptimizeReferenceGetter = preOptimizeReferenceGetter)
+        FList, bwList, ampList = self.optimizeSingleFrame(x, y, initFList, initBwList, ampList, rate = rate, preOptimizeReferenceGetter = preOptimizeReferenceGetter)
         param.append((FList, bwList, ampList))
         estY = spectrumFromFilterList(x, FList, bwList, ampList, self.samprate)
         delta = np.log(np.clip(estY, 1e-6, np.inf)) - np.log(np.clip(y, 1e-6, np.inf))
@@ -181,10 +181,55 @@ class ParameterOptimizer:
         for iJitter in range(nJitter):
             FList = np.clip(initFList * np.random.uniform(0.8, 1.2, nFilter), self.minF, self.maxF)
             ampList = preOptimizeReferenceGetter(initFList)
-            FList, bwList, ampList = self(x, y, FList, initBwList, ampList, rate = rate, preOptimizeReferenceGetter = preOptimizeReferenceGetter)
+            FList, bwList, ampList = self.optimizeSingleFrame(x, y, FList, initBwList, ampList, rate = rate, preOptimizeReferenceGetter = preOptimizeReferenceGetter)
             param.append((FList, bwList, ampList))
             estY = spectrumFromFilterList(x, FList, bwList, ampList, self.samprate)
             delta = np.log(np.clip(estY, 1e-6, np.inf)) - np.log(np.clip(y, 1e-6, np.inf))
             cost.append(np.sum(np.abs(delta)))
 
         return param[np.argmin(np.abs(cost))]
+
+    def __call__(self, harmonicList, hAmpList, envList, FList = None, bwList = None, ampList = None, nFormant = None, nJitter = 0, rate = 1.0, preEmphasisFreq = 50.0):
+        nHop = envList.shape[0]
+        fftSize = (envList.shape[1] - 1) * 2
+        assert(nJitter >= 0)
+
+        envList = np.exp(envList)
+
+        if(nFormant is not None):
+            assert(FList is None)
+        if(FList is None):
+            assert(nFormant is not None)
+            FList = np.full((nHop, nFormant), formantFreq(np.arange(1, nFormant + 1), L = 0.16))
+        else:
+            FList = FList.copy()
+        nFormant = FList.shape[1]
+        if(bwList is None):
+            bwList = np.full((nHop, nFormant), 300.0)
+        else:
+            bwList = bwList.copy()
+        if(ampList is None):
+            ampList = np.zeros((nHop, nFormant))
+            if(nJitter == 0):
+                for iHop in range(nHop):
+                    porg = self.defaultPreOptimizeReferenceGetter(envList[iHop], fftSize, self.samprate)
+                    ampList[iHop] = porg(FList[iHop])
+        else:
+            ampList = ampList.copy()
+
+        peEnv = preEmphasisResponse(np.arange(envList.shape[1]) / fftSize * self.samprate, 50.0, self.samprate)
+        for iHop in range(nHop):
+            print(iHop)
+            if(harmonicList[iHop][0] == 0.0):
+                continue
+            porg = self.defaultPreOptimizeReferenceGetter(envList[iHop] * peEnv, fftSize, self.samprate)
+            need = harmonicList[iHop] > 0.0
+            harmonics = harmonicList[iHop][need]
+            hAmps = hAmpList[iHop][need]
+            hAmps *= preEmphasisResponse(harmonics, 50.0, self.samprate)
+            if(nJitter > 0):
+                FList[iHop], bwList[iHop], ampList[iHop] = self.optimizeSingleFrameAutoJitter(harmonics, hAmps, FList[iHop], bwList[iHop], porg, nJitter = nJitter, rate = rate)
+            else:
+                FList[iHop], bwList[iHop], ampList[iHop] = self.optimizeSingleFrame(harmonics, hAmps, FList[iHop], bwList[iHop], ampList[iHop], rate = rate, preOptimizeReferenceGetter = porg)
+            ampList[iHop] /= preEmphasisResponse(FList[iHop], 50.0, self.samprate)
+        return FList, bwList, ampList

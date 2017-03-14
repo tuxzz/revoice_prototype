@@ -66,6 +66,15 @@ def findValleys(x, minFreq, maxFreq, sr, threshold = 0.5, step = 0.01):
             ret.append(i)
     return ret
 
+def doPrefilter(x, maxFreq, sr):
+    filterOrder = int(2048 * sr / 44100.0)
+    if(filterOrder % 2 == 0):
+        filterOrder += 1
+    f = sp.firwin(filterOrder, max(1250.0, maxFreq * 1.25), window = "blackman", nyq = sr / 2.0)
+    halfFilterOrder = filterOrder // 2
+    x = sp.fftconvolve(x, f)[halfFilterOrder:-halfFilterOrder]
+    return x
+
 class Processor:
     def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
@@ -74,6 +83,7 @@ class Processor:
         self.minFreq = kwargs.get("minFreq", 80.0)
         self.maxFreq = kwargs.get("maxFreq", 1000.0)
         self.windowSize = kwargs.get("windowSize", max(roundUpToPowerOf2(self.samprate / self.minFreq * 2), self.hopSize * 4))
+        self.prefilter = kwargs.get("prefilter", True)
 
         self.valleyThreshold = kwargs.get("valleyThreshold", 0.5)
         self.valleyStep = kwargs.get("valleyStep", 0.01)
@@ -81,6 +91,12 @@ class Processor:
     def __call__(self, x, removeDC = True):
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
+
+        if(removeDC):
+            x = simpleDCRemove(x)
+        if(self.prefilter):
+            x = doPrefilter(x, self.maxFreq, self.samprate)
+
         out = np.zeros(nHop, dtype = np.float64)
         for iHop in range(nHop):
             frame = getFrame(x, iHop * self.hopSize, self.windowSize)

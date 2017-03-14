@@ -26,5 +26,5 @@ __all__ = [
     "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope", "cheaptrick", "lpcenvelope",
     "hnm", "hnm_qfft", "hnm_qhm",
     "klatt", "formanttracker",
-    "pitchtransform", "timetransform"
+    "pitchtransform", "timetransform",
 ]
