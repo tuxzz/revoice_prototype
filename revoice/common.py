@@ -54,18 +54,6 @@ def splitArray(seq, cond = lambda v:v <= 0.0 or np.isnan(v)):
 def simpleDCRemove(x):
     return x - np.mean(x)
 
-def _sumGaussian(x, stdev):
-    return np.sqrt(np.pi) * stdev * spec.erf(x / np.sqrt(2) / stdev) / np.sqrt(2)
-
-def sumGaussian(n, stdev):
-    return _sumGaussian(n - 1, stdev) - _sumGaussian(1 - n, stdev)
-
-def _sumGaussianSquare(x, stdev):
-    return np.sqrt(np.pi) * stdev * spec.erf(x / stdev) / 2.0
-
-def sumGaussianSquare(n, stdev):
-    return _sumGaussianSquare(n - 1, stdev) - _sumGaussianSquare(1 - n, stdev)
-
 @nb.jit(nb.types.Tuple((nb.int64, nb.int64, nb.int64, nb.int64))(nb.int64, nb.int64, nb.int64), nopython = True, cache = True)
 def getFrameRange(inputLen, center, size):
     leftSize = size // 2

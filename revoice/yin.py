@@ -23,8 +23,7 @@ def difference(x):
     transformedAudio = np.fft.rfft(x, n = paddedSize)
 
     # 2. half of the data, disguised as a convolution kernel
-    kernel = np.zeros(frameSize, dtype = np.float64)
-    kernel[:outSize] = x[:outSize][::-1]
+    kernel = x[:outSize][::-1]
     transformedKernel = np.fft.rfft(kernel, n = paddedSize)
 
     # 3. convolution
