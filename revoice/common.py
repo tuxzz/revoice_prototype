@@ -185,3 +185,17 @@ def calcSRER(x, y):
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+def lambertW(x):
+    A = 2.344
+    B = 0.8842
+    C = 0.9294
+    D = 0.5106
+    E = -1.213
+    y = (2.0 * np.e * x + 2.0) ** 0.5
+    w = (2.0 * np.log(1.0 + B * y) - np.log(1.0 + C * np.log(1.0 + D * y)) + E) / (1.0 + 1.0 / (2.0 * np.log(1.0 + B * y) + 2.0 * A))
+    for i in range(24):
+        u = np.exp(w)
+        v = w * u - x
+        w -= v / ((1.0 + w) * u - ((w + 2.0) * v) / (2.0 * w + 2.0))
+    return w
