@@ -14,6 +14,7 @@ from . import lpcenvelope
 from . import hnm
 from . import hnm_qfft
 from . import hnm_qhm
+from . import lfmodel
 from . import klatt
 from . import formanttracker
 from . import pitchtransform
@@ -25,6 +26,6 @@ __all__ = [
     "lpc",
     "adaptivestft", "melenvelope", "trueenvelope", "mfienvelope", "cheaptrick", "lpcenvelope",
     "hnm", "hnm_qfft", "hnm_qhm",
-    "klatt", "formanttracker",
+    "lfmodel", "klatt", "formanttracker",
     "pitchtransform", "timetransform",
 ]
