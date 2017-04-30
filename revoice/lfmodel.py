@@ -43,7 +43,7 @@ def calcParameter(T0, Ee, tp, te, ta):
     return wg, sinWgTe, cosWgTe, e, A, a, E0
 
 # [1] Doval, Boris, Christophe d'Alessandro, and Nathalie Henrich. "The spectrum of glottal flow models." Acta acustica united with acustica 92.6 (2006): 1026-1046.
-def calcSpectrum(f, sr, T0, Ee, tp, te, ta):
+def calcSpectrum(f, T0, Ee, tp, te, ta):
     assert((f > 0.0).all)
     assert(sr > 0.0)
     tp *= T0
@@ -58,7 +58,7 @@ def calcSpectrum(f, sr, T0, Ee, tp, te, ta):
     P4 = e * (1.0 - e * ta) * (1.0 - np.exp((-2.0j * np.pi * (T0 - te)) * f)) - (2.0j * e * ta * np.pi) * f
 
     pole = P1 * P2 + P3 * P4
-    magn = np.abs(pole) / sr
+    magn = np.abs(pole)
     phase = np.angle(pole)
 
     return magn, phase
