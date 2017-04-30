@@ -45,7 +45,6 @@ def calcParameter(T0, Ee, tp, te, ta):
 # [1] Doval, Boris, Christophe d'Alessandro, and Nathalie Henrich. "The spectrum of glottal flow models." Acta acustica united with acustica 92.6 (2006): 1026-1046.
 def calcSpectrum(f, T0, Ee, tp, te, ta):
     assert((f > 0.0).all)
-    assert(sr > 0.0)
     tp *= T0
     te *= T0
     ta *= T0
