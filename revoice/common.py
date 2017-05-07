@@ -4,6 +4,7 @@ import scipy.interpolate as ipl
 import scipy.signal as sp
 import scipy.special as spec
 import numba as nb
+import numbers
 
 windowDict = {
     #           func(N), main-lobe-width, mean
@@ -199,3 +200,16 @@ def lambertW(x):
         v = w * u - x
         w -= v / ((1.0 + w) * u - ((w + 2.0) * v) / (2.0 * w + 2.0))
     return w
+
+def wrap(phase):
+    out = phase - np.round(phase / (2.0 * np.pi)) * 2.0 * np.pi
+    if(isinstance(phase, numbers.Number)):
+        if(out > np.pi):
+            out -= 2 * np.pi
+        elif(out < np.pi):
+            out += 2 * np.pi
+    else:
+        out[out > np.pi] -= 2 * np.pi
+        out[out < -np.pi] += 2 * np.pi
+
+    return out

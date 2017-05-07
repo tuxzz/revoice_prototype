@@ -156,10 +156,10 @@ class Analyzer:
         # relative phase shift
         need = f0List > 0.0
         f0Need = f0List[need]
-        f0Need = f0Need.reshape((len(f0Need), 1))
-        base = hPhaseList[need].T[0].reshape((len(f0Need), 1))
-        hPhaseList[need] -= base * (hFreqList[need] / f0Need)
-        hPhaseList[need] = np.mod(np.mod(hPhaseList[need], 2 * np.pi) + 3.0 * np.pi, 2 * np.pi) - np.pi
+        nNeed = len(f0Need)
+        f0Need = f0Need.reshape(nNeed, 1)
+        base = hPhaseList[need].T[0].reshape(nNeed, 1)
+        hPhaseList[need] = wrap(hPhaseList[need] - (hFreqList[need] / f0Need) * base)
 
         # relative harmonic shift
         voiced = f0List > 0.0
@@ -218,17 +218,17 @@ class Synther:
         hFreqList[voiced] *= f0List[voiced].reshape(nVoiced, 1) * np.arange(1, nHar + 1)
         hFreqList[np.logical_or(hFreqList <= 0.0, hFreqList > self.mvf)] = 0.0
 
-        # relative phase shift
+        # relative phase shift & olaFac
         syncedHPhaseList = np.zeros((nHop * self.olaFac, nHar))
         basePhase = 0.0
+        syncedHPhaseList[0] = hPhaseList[0]
         for iFrame in range(1, nHop * self.olaFac):
             iHop = iFrame // self.olaFac
             f0 = f0List[iHop]
             if(f0 <= 0.0):
                 continue
-            basePhase += f0 * self.hopSize / self.olaFac / self.samprate * 2 * np.pi
-            syncedBasePhase = np.mod(basePhase, 2 * np.pi) - np.pi
-            syncedHPhaseList[iFrame] = syncedBasePhase / f0 * hFreqList[iHop] + hPhaseList[iHop]
+            basePhase += f0 * 2 * np.pi * (self.hopSize / self.olaFac / self.samprate)
+            syncedHPhaseList[iFrame] = wrap(hPhaseList[iHop] + (hFreqList[iHop] / f0) * wrap(basePhase))
 
         if(enableSinusoid):
             sinusoid = np.zeros(nOut)
