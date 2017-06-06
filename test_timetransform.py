@@ -3,8 +3,8 @@ import pylab as pl
 from revoice import *
 from revoice.common import *
 
-#w, sr = loadWav("voices/renri_i_A3.wav")
-w, sr = loadWav("voices/chihaya_01.wav")
+w, sr = loadWav("voices/renri_i_A3.wav")
+#w, sr = loadWav("voices/chihaya_01.wav")
 
 print("F0 Analyzing...")
 pyinProc = pyin.Processor(sr)
@@ -18,8 +18,8 @@ f0List, hFreqList, hAmpList, hPhaseList, sinusoidEnergyList, noiseEnvList, noise
 
 print("Time Transforming...")
 timeProc = timetransform.Processor(sr)
-newTimeList = np.linspace(0, len(f0List) - 1, len(f0List) * 0.5)
-f0List, hFreqList, hAmpList, hPhaseList, sinusoidEnergyList, noiseEnvList, noiseEnergyList = timeProc(newTimeList, f0List, hFreqList, hAmpList, hPhaseList, sinusoidEnergyList, noiseEnvList, noiseEnergyList)
+newTimeList = np.linspace(0, len(f0List) - 1, len(f0List) * 4.0)
+f0List, hPhaseList, hFreqList, hAmpList, sinusoidEnergyList, noiseEnvList, noiseEnergyList = timeProc.simple(newTimeList, f0List, hPhaseList, ((hFreqList, 1.0), hAmpList, sinusoidEnergyList, noiseEnvList, noiseEnergyList))
 
 print("Synthing...")
 synProc = hnm.Synther(sr)
