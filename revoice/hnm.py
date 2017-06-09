@@ -181,7 +181,7 @@ class Synther:
         self.olaFac = kwargs.get("olaFac", 2)
 
         self.mvf = kwargs.get("mvf", min(sr / 2 - 1e3, 20e3))
-        self.maxNoiseEnvHarmonic = kwargs.get("maxNoiseEnvHarmonic", 8)
+        self.maxNoiseEnvHarmonic = kwargs.get("maxNoiseEnvHarmonic", 4)
         self.maxNoiseEnvDCAdjustment = kwargs.get("maxNoiseEnvDCAdjustment", 10.0)
 
         assert(self.mvf <= self.samprate / 2)
@@ -236,7 +236,7 @@ class Synther:
             for iFrame in range(nHop * self.olaFac):
                 iHop = iFrame // self.olaFac
                 f0 = f0List[iHop]
-                if(f0 <= 0.0):
+                if(f0 <= 0.0 or sinusoidEnergyList[iHop] <= 0.0):
                     continue
                 energyAnalysisRadius = int(round(self.samprate / f0)) * 2
                 synthLeft = max(energyAnalysisRadius, self.hopSize)
@@ -251,6 +251,8 @@ class Synther:
                 energyBegin = synthLeft - energyAnalysisRadius
                 energyAnalysisWindow = np.hanning(energyAnalysisRadius * 2 + 1)
                 energy = np.mean((synthed[energyBegin:energyBegin + energyAnalysisRadius * 2 + 1] * energyAnalysisWindow * energyAnalysisWindowNormFac) ** 2)
+
+                assert(energy > 0.0)
 
                 # ola
                 olaBegin = synthLeft - self.hopSize
@@ -271,6 +273,8 @@ class Synther:
 
             # energy normalize & apply noise energy envelope
             for iFrame in range(nHop * self.olaFac):
+                if(noiseEnergyList[iHop] <= 0.0):
+                    continue
                 iCenter = iFrame * self.hopSize // self.olaFac
                 iHop = iFrame // self.olaFac
                 f0 = f0List[iHop]
@@ -309,6 +313,8 @@ class Synther:
                     energyAnalysisWindow = np.hanning(energyAnalysisRadius * 2 + 1)
                     envEnergy = np.mean((synthed[energyBegin:energyBegin + energyAnalysisRadius * 2 + 1] * energyAnalysisWindow * energyAnalysisWindowNormFac) ** 2)
 
+                    assert(envEnergy > 0.0)
+
                     # ola
                     olaBegin = synthLeft - self.hopSize
                     normalizedEnv = synthed[olaBegin:olaBegin + 2 * self.hopSize] / np.sqrt(envEnergy)
@@ -317,7 +323,6 @@ class Synther:
                 else:
                     noise[ib:ie] += (frame * np.sqrt(currEnergy / noiseEnergy) * synthWindow)[ob:oe]
             noise /= self.olaFac
-
         out = np.zeros(nOut)
         if(enableSinusoid):
             saveWav("sinrs.wav", sinusoid, self.samprate)
