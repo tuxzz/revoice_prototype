@@ -12,6 +12,16 @@ def normalized_pdf(a, b, begin, end, number):
             v[i] = v[i + 1]
     return v / np.sum(v)
 
+def extractF0(obsProbList):
+    nHop = len(obsProbList)
+
+    out = np.zeros(nHop, dtype = np.float64)
+    for iHop, (freqProb) in enumerate(obsProbList):
+        if(len(freqProb) > 0):
+            out[iHop] = freqProb.T[0][np.argmax(freqProb.T[1])]
+
+    return out
+
 class Processor:
     def __init__(self, sr, **kwargs):
         self.samprate = float(sr)
@@ -30,16 +40,6 @@ class Processor:
         self.bias = kwargs.get("bias", 1.0)
 
         self.pdf = kwargs.get("pdf", normalized_pdf(1.7, 6.8, 0.0, 1.0, 128))
-
-    def extractF0(self, obsProbList):
-        nHop = len(obsProbList)
-
-        out = np.zeros(nHop, dtype = np.float64)
-        for iHop, (freqProb) in enumerate(obsProbList):
-            if(len(freqProb) > 0):
-                out[iHop] = freqProb.T[0][np.argmax(freqProb.T[1])]
-
-        return out
 
     def __call__(self, x, removeDC = True):
         nX = len(x)
