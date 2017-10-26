@@ -1,4 +1,5 @@
 import numpy as np
+import pylab as pl
 
 from .common import *
 from . import yin
@@ -41,7 +42,7 @@ class Processor:
 
         self.pdf = kwargs.get("pdf", normalized_pdf(1.7, 6.8, 0.0, 1.0, 128))
 
-    def __call__(self, x, removeDC = True):
+    def __call__(self, x, w = None, removeDC = True):
         nX = len(x)
         nHop = getNFrame(nX, self.hopSize)
         pdfSize = len(self.pdf)
@@ -59,9 +60,7 @@ class Processor:
             while(newWindowSize != windowSize and iIter < self.maxIter):
                 windowSize = newWindowSize
                 frame = getFrame(x, iHop * self.hopSize, windowSize)
-                if(removeDC):
-                    frame = simpleDCRemove(frame)
-
+                
                 buff = yin.difference(frame)
                 buff = yin.cumulativeDifference(buff)
                 valleyIndexList = yin.findValleys(buff, self.minFreq, self.maxFreq, self.samprate, threshold = self.valleyThreshold, step = self.valleyStep)
