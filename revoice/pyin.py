@@ -55,7 +55,7 @@ class Processor:
         for iHop in range(nHop):
             windowSize = 0
             minFreq = self.minFreq
-            newWindowSize = max(roundUpToPowerOf2(self.samprate / minFreq * 2), self.hopSize * 2)
+            newWindowSize = max(roundUpToPowerOf2(self.samprate / minFreq * 4), self.hopSize)
             iIter = 0
             while(newWindowSize != windowSize and iIter < self.maxIter):
                 windowSize = newWindowSize
