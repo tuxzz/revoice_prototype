@@ -54,8 +54,7 @@ class Processor:
         out = []
         for iHop in range(nHop):
             windowSize = 0
-            minFreq = self.minFreq
-            newWindowSize = max(roundUpToPowerOf2(self.samprate / minFreq * 4), self.hopSize)
+            newWindowSize = max(roundUpToPowerOf2(self.samprate / self.minFreq * 4), self.hopSize)
             iIter = 0
             while(newWindowSize != windowSize and iIter < self.maxIter):
                 windowSize = newWindowSize
@@ -65,7 +64,7 @@ class Processor:
 
                 buff = yin.difference(frame)
                 buff = yin.cumulativeDifference(buff)
-                valleyIndexList = yin.findValleys(buff, minFreq, self.maxFreq, self.samprate, threshold = self.valleyThreshold, step = self.valleyStep)
+                valleyIndexList = yin.findValleys(buff, self.minFreq, self.maxFreq, self.samprate, threshold = self.valleyThreshold, step = self.valleyStep)
                 nValley = len(valleyIndexList)
                 if(valleyIndexList):
                     possibleFreq = min(self.maxFreq, max(self.samprate / valleyIndexList[-1] - 20.0, self.minFreq))
