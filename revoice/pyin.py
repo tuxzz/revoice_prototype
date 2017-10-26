@@ -68,8 +68,8 @@ class Processor:
                 valleyIndexList = yin.findValleys(buff, minFreq, self.maxFreq, self.samprate, threshold = self.valleyThreshold, step = self.valleyStep)
                 nValley = len(valleyIndexList)
                 if(valleyIndexList):
-                    possibleFreq = max(self.samprate / valleyIndexList[-1] - 20.0, self.minFreq)
-                    newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 2)), self.hopSize * 4)
+                    possibleFreq = min(self.maxFreq, max(self.samprate / valleyIndexList[-1] - 20.0, self.minFreq))
+                    newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 4)), self.hopSize)
                     if(newWindowSize % 2 == 1):
                         newWindowSize += 1
                     iIter += 1
