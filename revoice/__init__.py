@@ -21,6 +21,7 @@ from . import pitchtransform
 from . import timetransform
 from . import rtfilter
 from . import rtyin
+from . import rtpyin
 
 __all__ = [
     "common", "hmm",
@@ -30,5 +31,5 @@ __all__ = [
     "hnm", "hnm_qfft", "hnm_qhm",
     "lfmodel", "klatt", "formanttracker",
     "pitchtransform", "timetransform",
-    "rtfilter", "rtyin",
+    "rtfilter", "rtyin", "rtpyin",
 ]
