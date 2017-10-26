@@ -1,5 +1,4 @@
 import numpy as np
-import pylab as pl
 
 from . import yin
 from . import rtfilter

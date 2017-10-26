@@ -9,14 +9,13 @@ w, sr = loadWav("voices/yuri_orig.wav")
 nX = len(w)
 
 print("Without prefilter...")
-x = simpleDCRemove(w)
 rtyinProc = rtyin.Processor(sr, prefilter = False)
 nHop = getNFrame(nX, rtyinProc.hopSize)
 f0List = np.zeros(nHop)
 iInHop = 0
 iOutHop = 0
 while(True):
-    data = x[iInHop * rtyinProc.hopSize:(iInHop + 1) * rtyinProc.hopSize]
+    data = w[iInHop * rtyinProc.hopSize:(iInHop + 1) * rtyinProc.hopSize]
     if(len(data) == 0):
         data = None
     out = rtyinProc(data)
@@ -29,17 +28,15 @@ while(True):
 if(iOutHop != nHop):
     print("nHop mismatch(expected %d, got %d)" % (nHop, iOutHop))
     exit(1)
-del x
 
 print("With prefilter...")
-x = simpleDCRemove(w)
 rtyinProc = rtyin.Processor(sr, prefilter = True)
 nHop = getNFrame(nX, rtyinProc.hopSize)
 f0List_pf = np.zeros(nHop)
 iInHop = 0
 iOutHop = 0
 while(True):
-    data = x[iInHop * rtyinProc.hopSize:(iInHop + 1) * rtyinProc.hopSize]
+    data = w[iInHop * rtyinProc.hopSize:(iInHop + 1) * rtyinProc.hopSize]
     if(len(data) == 0):
         data = None
     out = rtyinProc(data)
@@ -52,14 +49,13 @@ while(True):
 if(iOutHop != nHop):
     print("nHop mismatch(expected %d, got %d)" % (nHop, iOutHop))
     exit(1)
-del x
 
 print("Non-RT...")
 yinProc = yin.Processor(sr, prefilter = False)
-f0List_o = yinProc(w)
+f0List_o = yinProc(w, removeDC = False)
 
 yinProc = yin.Processor(sr, prefilter = True)
-f0List_pf_o = yinProc(w)
+f0List_pf_o = yinProc(w, removeDC = False)
 
 if((np.abs(f0List - f0List_o) > 1e-5).any()):
     print("Test failed without prefilter, max diff = %lf" % np.max(np.abs(f0List - f0List_o)))
