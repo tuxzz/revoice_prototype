@@ -66,18 +66,20 @@ pyinProc = pyin.Processor(sr, prefilter = True)
 obsProbList_pf_o = pyinProc(w, removeDC = False)
 f0List_pf_o = pyin.extractF0(obsProbList_pf_o)
 
-if((np.abs(f0List - f0List_o) > 1e-5).any() or obsProbList != obsProbList_o):
+if((np.abs(f0List - f0List_o) > 1e-5).any()):
     print("Test failed without prefilter, max diff = %lf" % np.max(np.abs(f0List - f0List_o)))
-    for i in range(nHop):
-        if(obsProbList[i] != obsProbList_o[i]):
-            print("first obsProb diff @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
-            exit(1)
-if((np.abs(f0List_pf - f0List_pf_o) > 1e-5).any() or obsProbList_pf != obsProbList_pf_o):
+    exit(1)
+for i in range(nHop):
+    if((obsProbList[i] != obsProbList_o[i]).any()):
+        print("First obsProb diff without prefilter @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
+        exit(1)
+if((np.abs(f0List_pf - f0List_pf_o) > 1e-5).any()):
     print("Test failed with prefilter, max diff = %lf" % np.max(np.abs(f0List_pf - f0List_pf_o)))
-    for i in range(nHop):
-        if(obsProbList[i] != obsProbList_o[i]):
-            print("first obsProb diff @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
-            exit(1)
+    exit(1)
+for i in range(nHop):
+    if((obsProbList_pf[i] != obsProbList_pf_o[i]).any()):
+        print("First obsProb diff with prefilter @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
+        exit(1)
 
 t = np.arange(len(f0List)) * rtpyinProc.hopSize / sr
 #t = np.arange(len(f0List))
