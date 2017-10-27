@@ -14,6 +14,28 @@ class SparseHMM:
         assert(self.transProb.ndim == 1)
         assert(len(self.frm) == len(self.to))
         assert(len(self.transProb) == len(self.to))
+    
+    def viterbiForwardRest(self, obs, oldDelta):
+        fromState = self.frm
+        toState = self.to
+        transProb = self.transProb
+
+        nState = len(self.init)
+        nTrans = len(self.transProb)
+        
+        delta = np.zeros(nState, dtype = np.float64)
+        psi = np.zeros(nState, dtype = np.int)
+        currValue = oldDelta[fromState] * transProb
+
+        for iTrans in range(nTrans):
+            ts = toState[iTrans]
+            if(currValue[iTrans] > delta[ts]):
+                delta[ts] = currValue[iTrans] # will be multiplied by the right obs later
+                psi[ts] = fromState[iTrans]
+
+        delta *= obs
+
+        return delta, psi
 
     def viterbiDecode(self, obsSeq):
         nState = len(self.init)
@@ -25,11 +47,13 @@ class SparseHMM:
 
         #scale = np.zeros((nFrame), dtype = np.float64)
 
-        if(len(obsSeq) < 1): # too short
+        if(nFrame == 1):
+            return np.array([np.argmax(obsSeq[0])], dtype = np.int)
+        elif(nFrame <= 0):
             return np.zeros(0, dtype = np.int)
 
-        delta = np.zeros((nState), dtype = np.float64)
-        oldDelta = np.zeros((nState), dtype = np.float64)
+        delta = np.zeros(nState, dtype = np.float64)
+        oldDelta = np.zeros(nState, dtype = np.float64)
         psi = np.zeros((nFrame, nState), dtype = np.int) # matrix of remembered indices of the best transitions
 
         # init first frame
@@ -39,35 +63,23 @@ class SparseHMM:
         #scale[0] = 1.0 / deltaSum
 
         # rest of forward step
-        fromState = self.frm
-        toState = self.to
-        currTransProb = self.transProb
         for iFrame in range(1, nFrame):
-            currValue = oldDelta[fromState] * currTransProb
-
-            for iTrans in range(nTrans):
-                ts = toState[iTrans]
-                if(currValue[iTrans] > delta[ts]):
-                    delta[ts] = currValue[iTrans] # will be multiplied by the right obs later
-                    psi[iFrame][ts] = fromState[iTrans]
-
-            delta *= obsSeq[iFrame]
+            delta, psi[iFrame] = self.viterbiForwardRest(obsSeq[iFrame], oldDelta)
             deltaSum = np.sum(delta)
 
             if(deltaSum > 0.0):
                 oldDelta = delta / deltaSum
                 #scale[iFrame] = 1.0 / deltaSum
             else:
-                print("WARNING: Viterbi decoder has been fed some zero probabilities at frame %d." % (iFrame), file = sys.stderr)
+                print("WARNING: Viterbi decoder has been fed some zero probabilities at frame %d." % iFrame, file = sys.stderr)
                 oldDelta.fill(1.0 / nState)
                 #scale[iFrame] = 1.0
-            delta.fill(0.0)
 
         # init backward step
         bestStateIdx = np.argmax(oldDelta)
         #bestValue = oldDelta[bestStateIdx]
 
-        path = np.ndarray((nFrame), dtype = np.int) # the final output path
+        path = np.ndarray(nFrame, dtype = np.int) # the final output path
         path[-1] = bestStateIdx
 
         # rest of backward step
