@@ -6,8 +6,7 @@ from . import yin
 def normalized_pdf(a, b, begin, end, number):
     x = np.arange(0, number, dtype = np.float64) * ((end - begin) / number)
     v = np.power(x, a - 1.0) * np.power(1.0 - x, b - 1.0)
-    for i in range(2, len(v) + 1):
-        i = len(v) - i
+    for i in reversed(range(number - 1)):
         if(v[i] < v[i + 1]):
             v[i] = v[i + 1]
     return v / np.sum(v)
