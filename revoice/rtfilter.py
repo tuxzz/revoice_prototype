@@ -33,7 +33,7 @@ class Procressor:
                 if(len(conv) > 0):
                     return conv
             else:
-                return conv[self.delay - self.delayed:len(x)]
+                return conv[:len(x)]
         else:
             if(self.delayed == 0):
                 return None
