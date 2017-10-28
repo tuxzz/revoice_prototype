@@ -21,7 +21,7 @@ class Procressor:
         kernelSize = len(self.kernel)
         if(x is not None):
             x = np.asarray(x, dtype = np.float64)
-            if(len(x) * kernelSize < 128):
+            if(len(x) + kernelSize - 1 < 128):
                 conv = np.convolve(x, self.kernel)
             else:
                 conv = sp.fftconvolve(x, self.kernel)
