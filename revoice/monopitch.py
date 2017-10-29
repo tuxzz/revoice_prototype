@@ -8,7 +8,7 @@ def parameterFromPYin(pyin):
     samprate = pyin.samprate
     nSemitone = int(np.ceil(np.log2(pyin.maxFreq / pyin.minFreq) * 12.0))
     maxTransSemitone = (pyin.hopSize / pyin.samprate) / (256.0 / 44100.0) * 3.0
-    minFreq = 62.375
+    minFreq = pyin.minFreq
     return hopSize, samprate, nSemitone, maxTransSemitone, minFreq
 
 class Processor:
