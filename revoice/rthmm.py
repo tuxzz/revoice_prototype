@@ -39,7 +39,6 @@ class SparseHMM:
                 self.oldDelta = delta / self.deltaSum
             else:
                 print("WARNING: Viterbi decoder has been fed some zero probabilities.", file = sys.stderr)
-                self.oldDelta = delta
                 self.oldDelta.fill(1.0 / nState)
     
     def viterbiDecode(self, nBackward):
