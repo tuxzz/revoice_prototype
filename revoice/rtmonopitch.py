@@ -34,7 +34,7 @@ class Processor:
         
         # feed and decode
         obs = self.proc.calcStateProb(obsProb)
-        path = self.model.feed(obs)
+        self.model.feed(obs)
         self.currObsLength = min(self.currObsLength + 1, self.maxObsLength)
         path = self.model.viterbiDecode(self.currObsLength)
 
