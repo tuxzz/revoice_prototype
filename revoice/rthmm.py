@@ -17,7 +17,6 @@ class SparseHMM:
 
         nState = len(self.init)
         self.oldDelta = None
-        self.deltaSum = None
         self.psi = []
     
     def feed(self, obs):
@@ -25,18 +24,17 @@ class SparseHMM:
 
         if(self.oldDelta is None):
             self.oldDelta = self.init * obs
-            self.deltaSum = np.sum(self.oldDelta)
             self.psi.append(np.zeros(nState, dtype = np.int))
         else:
             psiFrame = np.zeros(nState, dtype = np.int)
             delta, psiFrame = self.proc.viterbiForwardRest(obs, self.oldDelta)
-            self.deltaSum = np.sum(delta)
+            deltaSum = np.sum(delta)
             self.psi.append(psiFrame)
             if(len(self.psi) > self.nMaxBackward):
                 self.psi = self.psi[-self.nMaxBackward:]
 
-            if(self.deltaSum > 0.0):
-                self.oldDelta = delta / self.deltaSum
+            if(deltaSum > 0.0):
+                self.oldDelta = delta / deltaSum
             else:
                 print("WARNING: Viterbi decoder has been fed some zero probabilities.", file = sys.stderr)
                 self.oldDelta.fill(1.0 / nState)
