@@ -53,7 +53,7 @@ class Processor:
         out = []
         for iHop in range(nHop):
             windowSize = 0
-            newWindowSize = max(roundUpToPowerOf2(self.samprate / self.minFreq * 4), self.hopSize)
+            newWindowSize = max(roundUpToPowerOf2(self.samprate / self.minFreq * 4), self.hopSize * 2)
             iIter = 0
             while(newWindowSize != windowSize and iIter < self.maxIter):
                 windowSize = newWindowSize
@@ -65,7 +65,7 @@ class Processor:
                 nValley = len(valleyIndexList)
                 if(valleyIndexList):
                     possibleFreq = min(self.maxFreq, max(self.samprate / valleyIndexList[-1] - 20.0, self.minFreq))
-                    newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 4)), self.hopSize)
+                    newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 4)), self.hopSize * 2)
                     if(newWindowSize % 2 == 1):
                         newWindowSize += 1
                     iIter += 1

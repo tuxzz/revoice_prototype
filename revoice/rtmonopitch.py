@@ -68,7 +68,7 @@ class Processor:
         # mark unvoiced->voiced bound as voiced
         for iHop in range(1, self.currObsLength):
             if(out[iHop - 1] <= 0.0 and out[iHop] > 0.0):
-                windowSize = max(int(np.ceil(self.samprate / out[iHop] * 4)), self.hopSize)
+                windowSize = max(int(np.ceil(self.samprate / out[iHop] * 4)), self.hopSize * 2)
                 if(windowSize % 2 == 1):
                     windowSize += 1
                 frameOffset = int(round(windowSize / self.hopSize / 2))

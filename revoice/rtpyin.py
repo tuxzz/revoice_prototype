@@ -11,7 +11,7 @@ class Processor:
 
         self.minFreq = kwargs.get("minFreq", 80.0)
         self.maxFreq = kwargs.get("maxFreq", 1000.0)
-        self.maxIter = 4
+        self.maxIter = kwargs.get("maxIter", 4)
         self.prefilter = kwargs.get("prefilter", True)
 
         self.valleyThreshold = kwargs.get("valleyThreshold", 1.0)

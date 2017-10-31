@@ -5,6 +5,7 @@ from revoice.common import *
 
 #w, sr = loadWav("voices/renri_i_A3.wav")
 w, sr = loadWav("voices/chihaya_01.wav")
+#w, sr = loadWav("voices/yuri_orig.wav")
 
 pyinProc = pyin.Processor(sr, prefilter = False)
 obsProbList = pyinProc(w)
