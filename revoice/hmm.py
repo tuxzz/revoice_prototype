@@ -58,6 +58,9 @@ class SparseHMM:
 
         # init first frame
         oldDelta = self.init * obsSeq[0]
+        deltaSum = np.sum(oldDelta)
+        if(deltaSum > 0.0):
+            oldDelta /= deltaSum
 
         #scale[0] = 1.0 / deltaSum
 

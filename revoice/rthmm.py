@@ -24,6 +24,9 @@ class SparseHMM:
 
         if(self.oldDelta is None):
             self.oldDelta = self.init * obs
+            deltaSum = np.sum(self.oldDelta)
+            if(deltaSum > 0.0):
+                self.oldDelta /= deltaSum
             self.psi.append(np.zeros(nState, dtype = np.int))
         else:
             psiFrame = np.zeros(nState, dtype = np.int)
