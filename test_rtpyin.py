@@ -70,15 +70,15 @@ if((np.abs(f0List - f0List_o) > 1e-5).any()):
     print("Test failed without prefilter, max diff = %lf" % np.max(np.abs(f0List - f0List_o)))
     exit(1)
 for i in range(nHop):
-    if((obsProbList[i] != obsProbList_o[i]).any()):
+    if((np.abs(obsProbList[i] - obsProbList_o[i]) > 1e-5).any()):
         print("First obsProb diff without prefilter @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
         exit(1)
 if((np.abs(f0List_pf - f0List_pf_o) > 1e-5).any()):
     print("Test failed with prefilter, max diff = %lf" % np.max(np.abs(f0List_pf - f0List_pf_o)))
     exit(1)
 for i in range(nHop):
-    if((obsProbList_pf[i] != obsProbList_pf_o[i]).any()):
-        print("First obsProb diff with prefilter @ %d(%s, %s)" % (i, obsProbList[i], obsProbList_o[i]))
+    if((np.abs(obsProbList_pf[i] - obsProbList_pf_o[i]) > 1e-5).any()):
+        print("First obsProb diff with prefilter @ %d(%s, %s)" % (i, obsProbList_pf[i], obsProbList_pf_o[i]))
         exit(1)
 
 t = np.arange(len(f0List)) * rtpyinProc.hopSize / sr

@@ -31,7 +31,7 @@ class Processor:
             filterOrder = int(2048 * sr / 44100.0)
             if(filterOrder % 2 == 0):
                 filterOrder += 1
-            kernel = sp.firwin(filterOrder, max(1250.0, self.maxFreq * 1.25), window = "blackman", nyq = sr / 2.0)
+            kernel = sp.firwin(filterOrder, max(1500.0, self.maxFreq * 4.0), window = "blackman", nyq = sr / 2.0)
             self.prefilterProc = rtfilter.Procressor(kernel)
             self.delay += filterOrder
         self.buffer = np.zeros(halfWindowSize, dtype = np.float64)
@@ -67,7 +67,7 @@ class Processor:
         assert len(self.buffer) >= self.maxWindowSize
 
         windowSize = 0
-        newWindowSize = max(roundUpToPowerOf2(self.samprate / self.minFreq * 4), self.hopSize)
+        newWindowSize = max(roundUpToPowerOf2(self.samprate / self.minFreq * 4), self.hopSize * 2)
         iIter = 0
         while(newWindowSize != windowSize and iIter < self.maxIter):
             windowSize = newWindowSize
@@ -80,7 +80,7 @@ class Processor:
             nValley = len(valleyIndexList)
             if(valleyIndexList):
                 possibleFreq = min(self.maxFreq, max(self.samprate / valleyIndexList[-1] - 20.0, self.minFreq))
-                newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 4)), self.hopSize)
+                newWindowSize = max(int(np.ceil(self.samprate / possibleFreq * 4)), self.hopSize * 2)
                 if(newWindowSize % 2 != 0):
                     newWindowSize += 1
                 iIter += 1
