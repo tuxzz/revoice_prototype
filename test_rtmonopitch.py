@@ -5,9 +5,30 @@ from revoice.common import *
 
 #w, sr = loadWav("voices/renri_i_A3.wav")
 w, sr = loadWav("voices/chihaya_01.wav")
+#w, sr = loadWav("voices/yuri_orig.wav")
+prefilter = True
+
+print("rtPYIN...")
+x = w
+rtpyinProc = rtpyin.Processor(sr, prefilter = prefilter)
+nHop = getNFrame(len(x), rtpyinProc.hopSize)
+obsProbList_c = []
+iInHop = 0
+iOutHop = 0
+while(True):
+    data = x[iInHop * rtpyinProc.hopSize:(iInHop + 1) * rtpyinProc.hopSize]
+    if(len(data) == 0):
+        data = None
+    out = rtpyinProc(data)
+    if(out is not None):
+        obsProbList_c.append(out)
+        iOutHop += 1
+    elif(data is None):
+        break
+    iInHop += 1
 
 print("pYIN...")
-pyinProc = pyin.Processor(sr)
+pyinProc = pyin.Processor(sr, prefilter = prefilter)
 obsProbList = pyinProc(w)
 
 print("RT...")
@@ -19,7 +40,7 @@ rtmonopitchProc = rtmonopitch.Processor(*monopitch.parameterFromPYin(pyinProc))
 f0List = np.zeros(nHop)
 for iHop in range(nHop):
     frame = getFrame(x, iHop * rtmonopitchProc.hopSize, 2 * rtmonopitchProc.hopSize)
-    out = rtmonopitchProc(frame, obsProbList[iHop])
+    out = rtmonopitchProc(frame, obsProbList_c[iHop])
     if(out is None):
         continue
 
@@ -37,7 +58,7 @@ zF0List_o = f0List_o.copy()
 zF0List_o[f0List_o < 0.0] = 0.0
 
 ret = 0
-if((zF0List != zF0List_o).any()):
+if((np.abs(zF0List - zF0List_o) > 0.1).any()):
     print("Test failed.")
     ret = 1
 else:
